@@ -1,0 +1,17 @@
+{% extends 'portal/base.html' %}
+
+{% block content %}
+<div class="card">
+  <h2>{{ role }} - Select Domain</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <select name="domain">
+        <option>AI</option>
+        <option>CSE</option>
+      </select>
+    </div>
+    <button type="submit">Next</button>
+  </form>
+</div>
+{% endblock %}

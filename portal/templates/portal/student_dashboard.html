@@ -1,0 +1,69 @@
+{% extends 'portal/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Student Dashboard - {{ student_id }}</h2>
+
+    <h3>Available Assignments</h3>
+    <div class="table-container" style="margin-bottom: 3rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Due Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notice in notices %}
+                <tr>
+                    <td>{{ notice.title }}</td>
+                    <td>{{ notice.description }}</td>
+                    <td>{{ notice.due_date }}</td>
+                    <td><a href="{% url 'submit_assignment' notice.id %}" class="btn">Submit</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No assignments available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3>My Submissions</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Assignment</th>
+                    <th>Submitted At</th>
+                    <th>Grade</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr>
+                    <td>{{ sub.notice.title }}</td>
+                    <td>{{ sub.submitted_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        {% if sub.grade %}
+                        <span class="text-success" style="font-weight:bold;">{{ sub.grade }}</span>
+                        {% else %}
+                        <span class="text-muted">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ sub.review|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No submissions yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

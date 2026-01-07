@@ -1,0 +1,21 @@
+{% extends 'portal/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Submit Assignment</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <input type="text" name="student_name" placeholder="Student Name" required>
+        </div>
+        <div>
+            <input type="file" name="file" required>
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if msg %}
+    <p class="text-success text-center" style="margin-top: 1rem;">{{ msg }}</p>
+    {% endif %}
+</div>
+{% endblock %}

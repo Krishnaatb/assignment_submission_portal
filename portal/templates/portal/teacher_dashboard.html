@@ -1,0 +1,59 @@
+{% extends 'portal/base.html' %}
+
+{% block content %}
+<div class="card">
+  <h2>Teacher Dashboard - {{ domain }}</h2>
+
+  <!-- Create Notice Section -->
+  <div style="margin-bottom: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 2rem;">
+    <h3>Create New Notice</h3>
+    <form action="{% url 'create_notice' %}" method="post">
+      {% csrf_token %}
+      <div>
+        <input type="text" name="title" placeholder="Assignment Title" required>
+      </div>
+      <div>
+        <textarea name="description" placeholder="Description/Instructions" rows="3"
+          style="width:100%; padding:0.75rem; border:1px solid var(--border); border-radius:var(--radius);"
+          required></textarea>
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem; color:var(--text-muted);">Due
+          Date</label>
+        <input type="date" name="due_date" required>
+      </div>
+      <button type="submit">Publish Notice</button>
+    </form>
+  </div>
+
+  <!-- Notices List -->
+  <h3>Published Notices & Submissions</h3>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Due Date</th>
+          <th>Created</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for notice in notices %}
+        <tr>
+          <td>{{ notice.title }}</td>
+          <td>{{ notice.due_date }}</td>
+          <td>{{ notice.created_at|date:"M d, Y" }}</td>
+          <td><a href="{% url 'notice_detail' notice.id %}" class="btn"
+              style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">View Submissions</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center">No notices created yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'portal/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2>Submissions for: {{ notice.title }}</h2>
+        <a href="{% url 'teacher_dashboard' %}" class="btn" style="background:var(--text-muted);">Back</a>
+    </div>
+
+    <p style="margin-bottom:2rem; color:var(--text-muted);">{{ notice.description }}</p>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>ID</th>
+                    <th>Submitted</th>
+                    <th>File</th>
+                    <th style="width:30%;">Grade & Review</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in assignments %}
+                <tr>
+                    <td>{{ sub.student_name }}</td>
+                    <td>{{ sub.student_id }}</td>
+                    <td>{{ sub.submitted_at|date:"M d, H:i" }}</td>
+                    <td><a href="{{ sub.file.url }}" target="_blank">Download</a></td>
+                    <td>
+                        <form action="{% url 'grade_assignment' sub.id %}" method="post"
+                            style="display:flex; flex-direction:column; gap:0.5rem;">
+                            {% csrf_token %}
+                            <div style="display:flex; gap:0.5rem;">
+                                <input type="text" name="grade" value="{{ sub.grade|default:'' }}" placeholder="Grade"
+                                    style="width:80px;" required>
+                                <button type="submit" style="padding:0.5rem; font-size:0.8rem;">Save</button>
+                            </div>
+                            <textarea name="review" rows="2" placeholder="Review/Comments"
+                                style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:var(--radius);">{{ sub.review|default:'' }}</textarea>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No submissions received yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
