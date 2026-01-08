@@ -37,10 +37,23 @@ def login_view(request):
 def teacher_dashboard(request):
     domain = request.session.get('domain')
     # Show notices created for this domain
-    notices = Notice.objects.filter(domain=domain).order_by('-created_at')
+    teacher_email = request.session.get('user_id')
+    notices = Notice.objects.filter(domain=domain, teacher_email=teacher_email).order_by('-created_at')
+    
+    # Get unique students who have submitted to these notices
+    submitted_assignments = Assignment.objects.filter(notice__in=notices)
+    unique_students = {}
+    for asn in submitted_assignments:
+        if asn.student_id not in unique_students:
+            unique_students[asn.student_id] = asn.student_name
+            
+    # Convert to list of dicts for template
+    students_list = [{'id': sid, 'name': name} for sid, name in unique_students.items()]
+    
     return render(request, 'portal/teacher_dashboard.html', {
         'notices': notices,
-        'domain': domain
+        'domain': domain,
+        'students': students_list
     })
 
 def create_notice(request):
@@ -49,13 +62,24 @@ def create_notice(request):
             title=request.POST['title'],
             description=request.POST['description'],
             due_date=request.POST['due_date'],
-            domain=request.session.get('domain')
+            domain=request.session.get('domain'),
+            teacher_email=request.session.get('user_id')
         )
         return redirect('teacher_dashboard')
     return redirect('teacher_dashboard')
 
 def notice_detail(request, notice_id):
     notice = get_object_or_404(Notice, id=notice_id)
+    
+    # Permission Check
+    role = request.session.get('role')
+    user_id = request.session.get('user_id')
+    
+    if role == 'Teacher':
+        if notice.teacher_email != user_id:
+             # Unauthorized access for this teacher
+             return redirect('teacher_dashboard')
+             
     assignments = notice.assignments.all()
     return render(request, 'portal/notice_detail.html', {
         'notice': notice,
@@ -64,6 +88,12 @@ def notice_detail(request, notice_id):
 
 def grade_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    # Permission Check
+    if request.session.get('role') == 'Teacher':
+        if assignment.notice.teacher_email != request.session.get('user_id'):
+            return redirect('teacher_dashboard')
+
     if request.method == 'POST':
         assignment.grade = request.POST['grade']
         assignment.review = request.POST['review']
